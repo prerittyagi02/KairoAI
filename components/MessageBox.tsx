@@ -8,12 +8,21 @@ type Props = {
 };
 
 const MessageBox = ({ role, content }: Props) => {
+  const isUser = role === "user";
+
   return (
-    <Card className="overflow-hidden bg-transparent">
-      <CardContent className="p-6 text-sm">
+    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+      <Card
+        className={`max-w-[85%] overflow-hidden border ${
+          isUser
+            ? "border-emerald-200 bg-emerald-50/70 dark:border-emerald-800 dark:bg-emerald-900/20"
+            : "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"
+        }`}
+      >
+      <CardContent className="p-5 text-sm">
         <Markdown text={content} />
       </CardContent>
-      {role !== "user" && (
+      {!isUser && (
         <CardFooter className="border-t bg-transparent  px-6 py-3 text-xs text-muted-foreground">
           Disclaimer: The medical insights and suggestions provided by this
           application are for informational purposes only and should not be
@@ -21,7 +30,8 @@ const MessageBox = ({ role, content }: Props) => {
           applying.
         </CardFooter>
       )}
-    </Card>
+      </Card>
+    </div>
   );
 };
 

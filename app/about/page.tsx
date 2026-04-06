@@ -1,411 +1,162 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Sun, Moon, ArrowLeft } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
+import { ShieldCheck, Brain, HeartHandshake, Languages } from "lucide-react";
+import AppFooter from "@/components/AppFooter";
+import Navbar from "@/components/Navbar";
+
+const values = [
+  {
+    title: "Accessibility",
+    description:
+      "We turn complex medical language into clear, practical explanations for everyday users.",
+    icon: Languages,
+  },
+  {
+    title: "Accuracy",
+    description:
+      "Clinical context and careful model behavior are prioritized in every report and response.",
+    icon: Brain,
+  },
+  {
+    title: "Empathy",
+    description:
+      "Health conversations are sensitive. We design guidance that stays supportive and calm.",
+    icon: HeartHandshake,
+  },
+  {
+    title: "Privacy",
+    description:
+      "Data safety, secure flows, and confidentiality are treated as baseline requirements.",
+    icon: ShieldCheck,
+  },
+];
 
 export default function AboutPage() {
-  const [isDark, setIsDark] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    setIsLoaded(true);
-  }, []);
-
-  const toggleDark = () => {
-    setIsDark(!isDark);
-    document.documentElement.classList.toggle("dark");
-  };
-
   return (
-    <div
-      className={`min-h-screen bg-gradient-to-br ${
-        isDark
-          ? "from-gray-900 to-gray-800 text-gray-100"
-          : "from-blue-50 to-indigo-50 text-gray-800"
-      } transition-colors duration-500`}
-    >
-      <div className="container mx-auto px-6 py-10">
-        <header
-          className={`flex justify-between items-center mb-16 ${
-            isLoaded ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
-          } transition-all duration-700 ease-out`}
-        >
-          <div className="flex items-center gap-3">
-            <Link href="/">
-              <Button
-                variant="outline"
-                size="sm"
-                className={`rounded-full ${
-                  isDark
-                    ? "border-gray-700 bg-gray-800 hover:bg-gray-700 text-indigo-300"
-                    : "border-blue-200 bg-white hover:bg-blue-50 text-indigo-600"
-                } hover:scale-105 transition-all duration-300`}
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Home
-              </Button>
-            </Link>
-          </div>
+    <div className="min-h-screen bg-gradient-to-b from-emerald-50/70 via-white to-sky-50/70 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
+      <Navbar />
 
-          <div className="flex items-center gap-4">
-            <div className="bg-white p-2 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
-              <img src="/medical.png" alt="Medihelp Logo" className="h-8 w-8" />
+      <main className="mx-auto max-w-7xl px-4 py-14 sm:py-16">
+        <section className="rounded-3xl border border-emerald-200 bg-white/85 p-8 shadow-sm dark:border-slate-700 dark:bg-slate-900/80 sm:p-12">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-300">
+            About Kairo AI
+          </p>
+          <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-5xl">
+            Built to make health understanding simple, clear, and reliable
+          </h1>
+          <p className="mt-5 max-w-3xl text-sm leading-7 text-slate-600 dark:text-slate-300">
+            Kairo AI helps patients and families understand reports, symptoms, and next steps without
+            getting lost in clinical jargon. We combine medical context, multilingual support, and
+            practical guidance so users can prepare better for real healthcare conversations.
+          </p>
+
+          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-5 dark:border-slate-700 dark:bg-slate-900">
+              <p className="text-2xl font-semibold text-slate-900 dark:text-white">4+</p>
+              <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Core health workflows</p>
             </div>
-
-            <Button
-              variant="outline"
-              size="icon"
-              className={`rounded-full ${
-                isDark
-                  ? "border-gray-700 bg-gray-800 hover:bg-gray-700"
-                  : "border-blue-200 bg-white hover:bg-blue-50"
-              } hover:rotate-12 transition-all duration-300`}
-              onClick={toggleDark}
-            >
-              {isDark ? (
-                <Sun className="h-5 w-5 text-yellow-400" />
-              ) : (
-                <Moon className="h-5 w-5 text-indigo-600" />
-              )}
-            </Button>
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-5 dark:border-slate-700 dark:bg-slate-900">
+              <p className="text-2xl font-semibold text-slate-900 dark:text-white">10+</p>
+              <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Supported languages</p>
+            </div>
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-5 dark:border-slate-700 dark:bg-slate-900">
+              <p className="text-2xl font-semibold text-slate-900 dark:text-white">24/7</p>
+              <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">AI guidance availability</p>
+            </div>
           </div>
-        </header>
+        </section>
 
-        <main className="max-w-4xl mx-auto">
-          <div
-            className={`mb-12 text-center ${
-              isLoaded ? "opacity-100 scale-100" : "opacity-0 scale-90"
-            } transition-all duration-1000 ease-out`}
-          >
-            <h1
-              className={`text-5xl font-extrabold tracking-tight mb-6 ${
-                isDark
-                  ? "text-transparent bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text"
-                  : "text-transparent bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text"
-              }`}
-            >
-              About MediHelp
-            </h1>
-            <div
-              className={`w-24 h-1 mx-auto rounded-full ${
-                isDark ? "bg-indigo-500" : "bg-indigo-600"
-              }`}
-            ></div>
-          </div>
-          <div
-            className={`space-y-12 ${
-              isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-            } transition-all duration-1000 delay-300 ease-out`}
-          >
-            <section
-              className={`p-8 rounded-xl ${
-                isDark ? "bg-gray-800/70" : "bg-white"
-              } shadow-md`}
-            >
-              <h2
-                className={`text-2xl font-bold mb-4 ${
-                  isDark ? "text-indigo-300" : "text-indigo-700"
-                }`}
-              >
-                Our Mission
-              </h2>
-              <p
-                className={`${isDark ? "text-gray-300" : "text-gray-700"} mb-4`}
-              >
-                At MediHelp, our mission is to bridge the gap between complex
-                medical information and everyday understanding. We believe that
-                everyone deserves access to clear, comprehensible explanations
-                of their health data, regardless of their medical background or
-                expertise.
-              </p>
-              <p className={`${isDark ? "text-gray-300" : "text-gray-700"}`}>
-                Founded in 2023, MediHelp was born from the recognition that
-                many patients struggle to understand their medical reports and
-                the implications for their health. Our AI-powered platform
-                transforms technical medical jargon into accessible insights,
-                empowering patients to take control of their health journey with
-                confidence and clarity.
-              </p>
-            </section>
-            <section
-              className={`p-8 rounded-xl ${
-                isDark ? "bg-gray-800/70" : "bg-white"
-              } shadow-md`}
-            >
-              <h2
-                className={`text-2xl font-bold mb-4 ${
-                  isDark ? "text-indigo-300" : "text-indigo-700"
-                }`}
-              >
-                Our Team
-              </h2>
-              <p
-                className={`${isDark ? "text-gray-300" : "text-gray-700"} mb-4`}
-              >
-                MediHelp brings together a diverse team of healthcare
-                professionals, AI specialists, and user experience designers
-                united by a shared vision: making healthcare information more
-                accessible to all.
-              </p>
-              <p className={`${isDark ? "text-gray-300" : "text-gray-700"}`}>
-                Our multidisciplinary team includes board-certified physicians,
-                data scientists specialized in healthcare AI, mental health
-                professionals, and designers with expertise in creating
-                intuitive healthcare interfaces. This collaborative approach
-                ensures that MediHelp delivers accurate, helpful, and
-                user-friendly insights that address the whole spectrum of
-                users&apos; health concerns.
-              </p>
-            </section>
-            <section
-              className={`p-8 rounded-xl ${
-                isDark ? "bg-gray-800/70" : "bg-white"
-              } shadow-md`}
-            >
-              <h2
-                className={`text-2xl font-bold mb-4 ${
-                  isDark ? "text-indigo-300" : "text-indigo-700"
-                }`}
-              >
-                Our Technology
-              </h2>
-              <p
-                className={`${isDark ? "text-gray-300" : "text-gray-700"} mb-4`}
-              >
-                MediHelp leverages cutting-edge artificial intelligence and
-                natural language processing to analyze medical reports, speech
-                inputs, and user queries. Our proprietary algorithms have been
-                trained on diverse medical datasets to ensure accuracy across
-                different specialties, demographic groups, and health
-                conditions.
-              </p>
-              <p
-                className={`${isDark ? "text-gray-300" : "text-gray-700"} mb-4`}
-              >
-                We employ a hybrid approach that combines rule-based systems and
-                machine learning models to ensure both precision and
-                adaptability. Our mental health module was developed in
-                collaboration with clinical psychologists and psychiatrists to
-                provide sensitive, appropriate guidance for users seeking mental
-                health support.
-              </p>
-              <p className={`${isDark ? "text-gray-300" : "text-gray-700"}`}>
-                All data processing occurs with strict attention to privacy and
-                security, adhering to HIPAA guidelines and employing end-to-end
-                encryption to protect users&apos; sensitive health information.
-              </p>
-            </section>
-            <section
-              className={`p-8 rounded-xl ${
-                isDark ? "bg-gray-800/70" : "bg-white"
-              } shadow-md`}
-            >
-              <h2
-                className={`text-2xl font-bold mb-4 ${
-                  isDark ? "text-indigo-300" : "text-indigo-700"
-                }`}
-              >
-                Our Values
-              </h2>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <h3
-                    className={`text-xl font-semibold mb-2 ${
-                      isDark ? "text-cyan-300" : "text-indigo-600"
-                    }`}
-                  >
-                    Accessibility
-                  </h3>
-                  <p
-                    className={`${isDark ? "text-gray-300" : "text-gray-700"}`}
-                  >
-                    We believe healthcare information should be understandable
-                    to everyone, regardless of their background or level of
-                    medical knowledge.
-                  </p>
-                </div>
-                <div>
-                  <h3
-                    className={`text-xl font-semibold mb-2 ${
-                      isDark ? "text-cyan-300" : "text-indigo-600"
-                    }`}
-                  >
-                    Accuracy
-                  </h3>
-                  <p
-                    className={`${isDark ? "text-gray-300" : "text-gray-700"}`}
-                  >
-                    Our commitment to medical precision is unwavering, with all
-                    insights reviewed and validated by healthcare professionals.
-                  </p>
-                </div>
-                <div>
-                  <h3
-                    className={`text-xl font-semibold mb-2 ${
-                      isDark ? "text-cyan-300" : "text-indigo-600"
-                    }`}
-                  >
-                    Empathy
-                  </h3>
-                  <p
-                    className={`${isDark ? "text-gray-300" : "text-gray-700"}`}
-                  >
-                    We approach every user interaction with compassion,
-                    understanding that health concerns can be accompanied by
-                    anxiety and uncertainty.
-                  </p>
-                </div>
-                <div>
-                  <h3
-                    className={`text-xl font-semibold mb-2 ${
-                      isDark ? "text-cyan-300" : "text-indigo-600"
-                    }`}
-                  >
-                    Privacy
-                  </h3>
-                  <p
-                    className={`${isDark ? "text-gray-300" : "text-gray-700"}`}
-                  >
-                    We maintain the highest standards of data protection and
-                    confidentiality, treating users&apos; health information
-                    with the utmost respect.
-                  </p>
-                </div>
-              </div>
-            </section>
-            <section
-              className={`p-8 rounded-xl ${
-                isDark ? "bg-gray-800/70" : "bg-white"
-              } shadow-md text-center`}
-            >
-              <h2
-                className={`text-2xl font-bold mb-4 ${
-                  isDark ? "text-indigo-300" : "text-indigo-700"
-                }`}
-              >
-                Get in Touch
-              </h2>
-              <p
-                className={`${isDark ? "text-gray-300" : "text-gray-700"} mb-6`}
-              >
-                Have questions about MediHelp? We&apos;d love to hear from you.
-              </p>
-              <div className="flex flex-col md:flex-row items-center justify-center gap-6">
-                <div
-                  className={`px-6 py-4 rounded-lg ${
-                    isDark ? "bg-gray-750" : "bg-indigo-50"
-                  }`}
-                >
-                  <p
-                    className={`font-medium ${
-                      isDark ? "text-indigo-300" : "text-indigo-700"
-                    }`}
-                  >
-                    Name
-                  </p>
-                  <p
-                    className={`${isDark ? "text-gray-300" : "text-gray-700"}`}
-                  >
-                    Prerit Tyagi, Nitika
-                  </p>
-                </div>
-                <div
-                  className={`px-6 py-4 rounded-lg ${
-                    isDark ? "bg-gray-750" : "bg-indigo-50"
-                  }`}
-                >
-                  <p
-                    className={`font-medium ${
-                      isDark ? "text-indigo-300" : "text-indigo-700"
-                    }`}
-                  >
-                    Email
-                  </p>
-                  <p
-                    className={`${isDark ? "text-gray-300" : "text-gray-700"}`}
-                  >
-                    nitika030204@gmail.com
-                  </p>
-                </div>
-                <div
-                  className={`px-6 py-4 rounded-lg ${
-                    isDark ? "bg-gray-750" : "bg-indigo-50"
-                  }`}
-                >
-                  <p
-                    className={`font-medium ${
-                      isDark ? "text-indigo-300" : "text-indigo-700"
-                    }`}
-                  >
-                    Github
-                  </p>
-                  <Link
-                    href={"https://github.com/Nitika89/Medihelp"}
-                    className={`${isDark ? "text-gray-300" : "text-gray-700"}`}
-                  >
-                    https://github.com/Nitika89/Medihelp
-                  </Link>
-                </div>
-              </div>
-            </section>
-          </div>
-        </main>
-      </div>
-
-      <footer
-        className={`mt-24 py-6 ${isDark ? "bg-gray-900" : "bg-indigo-100/50"} 
-        ${isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} 
-        transition-all duration-1000 delay-500 ease-out`}
-      >
-        <div className="container mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p
-              className={`${
-                isDark ? "text-gray-500" : "text-gray-600"
-              } text-sm`}
-            >
-              © {new Date().getFullYear()} MediHelp. All rights reserved.
+        <section className="mt-10 grid gap-6 md:grid-cols-2">
+          <div className="rounded-3xl border border-emerald-200 bg-white/85 p-8 dark:border-slate-700 dark:bg-slate-900/80">
+            <Image
+              src="https://images.pexels.com/photos/5452251/pexels-photo-5452251.jpeg?cs=srgb&dl=pexels-tima-miroshnichenko-5452251.jpg&fm=jpg"
+              alt="Doctor discussing care plan with patient"
+              width={1200}
+              height={700}
+              className="mb-5 h-44 w-full rounded-2xl object-cover"
+            />
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Our Mission</h2>
+            <p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-300">
+              We aim to bridge the gap between medical data and everyday understanding so people can
+              make more confident decisions. From blood reports to symptom follow-ups, Kairo AI is
+              focused on clarity, usability, and practical care communication.
             </p>
-            <div className="flex gap-4 mt-4 md:mt-0">
-              <a
-                href="#"
-                className={`${
-                  isDark
-                    ? "text-gray-500 hover:text-gray-300"
-                    : "text-gray-600 hover:text-indigo-700"
-                } 
-                text-sm hover:underline transition-colors duration-300`}
-              >
-                Privacy Policy
-              </a>
-              <a
-                href="#"
-                className={`${
-                  isDark
-                    ? "text-gray-500 hover:text-gray-300"
-                    : "text-gray-600 hover:text-indigo-700"
-                } 
-                text-sm hover:underline transition-colors duration-300`}
-              >
-                Terms of Service
-              </a>
-              <a
-                href="#"
-                className={`${
-                  isDark
-                    ? "text-gray-500 hover:text-gray-300"
-                    : "text-gray-600 hover:text-indigo-700"
-                } 
-                text-sm hover:underline transition-colors duration-300`}
-              >
-                Contact
-              </a>
+          </div>
+
+          <div className="rounded-3xl border border-emerald-200 bg-white/85 p-8 dark:border-slate-700 dark:bg-slate-900/80">
+            <Image
+              src="https://images.pexels.com/photos/7089401/pexels-photo-7089401.jpeg?cs=srgb&dl=pexels-anna-shvets-7089401.jpg&fm=jpg"
+              alt="Healthcare professional using digital tablet"
+              width={1200}
+              height={700}
+              className="mb-5 h-44 w-full rounded-2xl object-cover"
+            />
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">How We Build</h2>
+            <p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-300">
+              Our product combines AI engineering, healthcare-aware design, and continuous iteration from
+              user feedback. Every feature is evaluated for readability, trust, and actionability before
+              release.
+            </p>
+          </div>
+        </section>
+
+        <section className="mt-10 rounded-3xl border border-emerald-200 bg-white/85 p-8 dark:border-slate-700 dark:bg-slate-900/80 sm:p-10">
+          <Image
+            src="https://images.pexels.com/photos/7108345/pexels-photo-7108345.jpeg?cs=srgb&dl=pexels-anna-shvets-7108345.jpg&fm=jpg"
+            alt="Patient and clinician reviewing health information"
+            width={1600}
+            height={900}
+            className="mb-6 h-52 w-full rounded-2xl object-cover"
+          />
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Our Values</h2>
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            {values.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div
+                  key={item.title}
+                  className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-5 dark:border-slate-700 dark:bg-slate-900"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 dark:bg-slate-800 dark:text-emerald-300">
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <p className="text-base font-semibold text-slate-900 dark:text-white">{item.title}</p>
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">{item.description}</p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="mt-10 overflow-hidden rounded-3xl border border-emerald-200 bg-gradient-to-r from-emerald-100/80 to-sky-100/80 p-8 dark:border-slate-700 dark:from-slate-900 dark:to-slate-800 sm:p-10">
+          <div className="flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
+            <div>
+              <h3 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">
+                Build better health conversations with Kairo AI
+              </h3>
+              <p className="mt-3 max-w-2xl text-sm text-slate-700 dark:text-slate-300">
+                Start with report analysis, symptom capture, and AI doctor chat in one connected workspace.
+              </p>
+            </div>
+            <div className="flex w-full gap-3 sm:w-auto">
+              <Link href="/signup" className="flex-1 sm:flex-none">
+                <button className="w-full rounded-full bg-emerald-700 px-6 py-3 text-sm font-semibold text-white hover:bg-emerald-800">
+                  Create account
+                </button>
+              </Link>
+              <Link href="/dashboard" className="flex-1 sm:flex-none">
+                <button className="w-full rounded-full border border-emerald-300 bg-white/90 px-6 py-3 text-sm font-semibold text-slate-900 hover:bg-emerald-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+                  Open dashboard
+                </button>
+              </Link>
             </div>
           </div>
-        </div>
-      </footer>
+        </section>
+      </main>
+
+      <AppFooter />
     </div>
   );
 }

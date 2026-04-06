@@ -1,84 +1,64 @@
-export const runtime = "edge";
+import { NextApiRequest, NextApiResponse } from "next";
+import { streamDoctorReply } from "@/lib/doctor-chat";
 
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { StreamData, streamText } from "ai";
-
-const google_api_key = "AIzaSyCigfKlZnwkG5Jo3ZjqBmlV1ObU2_52i50";
-
-export const maxDuration = 60;
-
-const google = createGoogleGenerativeAI({
-  baseURL: "https://generativelanguage.googleapis.com/v1beta",
-  apiKey: google_api_key,
-});
-
-const model = google("gemini-2.0-flash-exp", {
-  safetySettings: [
-    { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_LOW_AND_ABOVE" },
-    {
-      category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-      threshold: "BLOCK_LOW_AND_ABOVE",
-    },
-    {
-      category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-      threshold: "BLOCK_LOW_AND_ABOVE",
-    },
-    { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_LOW_AND_ABOVE" },
-    {
-      category: "HARM_CATEGORY_CIVIC_INTEGRITY",
-      threshold: "BLOCK_LOW_AND_ABOVE",
-    },
-  ],
-});
-
-export default async function handler(req: Request) {
-  const { messages, data } = await req.json();
-  console.log(data.reportData);
-
-  const userQuestion = `${messages[messages.length - 1].content}`;
-
- 
-  const finalPrompt = `You are a supportive, empathetic mental health assistant. I have a speech or text sample analysis and a user query related to mental health. Some relevant mental health insights are also provided that may be applicable to this case.
-
-**Speech/Text Analysis:**
-${data.reportData}
-**End of analysis**
-
-**User Query:**
-${userQuestion}
-**End of user query**
-Please analyze the speech/text data considering:
-1. Indicators of depression, anxiety, or other mental health concerns
-2. The severity level of any symptoms detected (mild, moderate, severe)
-3. Changes in linguistic patterns, emotional expression, or thought processes
-4. Potential stressors or triggers mentioned
-5. The specific questions or concerns raised by the user
-
-Provide a thoughtful, compassionate response that:
-- Addresses the user's specific query
-- Explains relevant indicators found in the speech/text analysis
-- Offers perspective on the mental health context
-- Suggests potential coping strategies or resources when appropriate
-- Uses warm, supportive language while remaining professional
-- Does NOT attempt to diagnose or replace professional mental health advice
-
-Important: Always emphasize that this analysis is not a clinical diagnosis and encourage seeking professional mental health support when appropriate.
-
-**Response:**
-`;
-  const rawdata = new StreamData();
-
-  const result = await streamText({
-    model: model,
-    prompt: finalPrompt,
-    onFinish() {
-      rawdata.close();
-    },
-  });
-
-  for await (const textPart of result.textStream) {
-    console.log(textPart);
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== "POST") {
+    res.status(405).json({ message: "Method not allowed" });
+    return;
   }
 
-  return result.toDataStreamResponse({ data: rawdata });
+  if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+    res.status(500).json({
+      message: "Missing GOOGLE_GENERATIVE_AI_API_KEY in server environment.",
+    });
+    return;
+  }
+
+  const { messages, data } = req.body as {
+    messages?: Array<{ role?: string; content?: string }>;
+    data?: { reportData?: string };
+  };
+
+  const normalizedMessages = Array.isArray(messages)
+    ? messages
+        .map((m) => ({
+          role: m.role === "assistant" ? "assistant" : "user",
+          content: typeof m.content === "string" ? m.content : "",
+        }))
+        .filter((m) => m.content.trim().length > 0)
+    : [];
+
+  const lastUserMessage =
+    [...normalizedMessages].reverse().find((m) => m.role === "user")?.content || "";
+
+  if (!lastUserMessage) {
+    res.status(400).json({ message: "No user message provided." });
+    return;
+  }
+
+  const reportContext =
+    typeof data?.reportData === "string" && data.reportData.trim().length > 0
+      ? `Medical report data from user:\n${data.reportData.slice(0, 12000)}`
+      : "No report data provided.";
+
+  try {
+    const result = streamDoctorReply({
+      userMessage: lastUserMessage,
+      context: reportContext,
+      conversation: normalizedMessages as Array<{ role: "user" | "assistant"; content: string }>,
+    });
+
+    result.pipeDataStreamToResponse(res, {
+      sendReasoning: false,
+      getErrorMessage: (error) =>
+        error instanceof Error
+          ? error.message
+          : "Unable to generate AI response right now.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error instanceof Error ? error.message : "Unable to generate AI response right now.",
+      error: true,
+    });
+  }
 }

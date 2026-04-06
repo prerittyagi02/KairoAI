@@ -6,6 +6,14 @@ const nextConfig: NextConfig = {
     "onnxruntime-node",
     "sharp", // Add sharp to the external packages list
   ],
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.pexels.com",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useChat } from "ai/react";
 import { Button } from "./ui/button";
@@ -13,10 +12,10 @@ type Props = {
 
 const ChatComponent = ({ reportData }: Props) => {
   const { messages, input, handleInputChange, handleSubmit, isLoading } =
-    useChat({ api: "/api/resumechat" });
+    useChat({ api: "/api/resumechat", streamProtocol: "data" });
 
   return (
-    <div className="h-[118vh] relative flex flex-col rounded-xl gap-3 bg-gradient-to-b from-indigo-50/50 to-blue-50/50 dark:from-gray-800/50 dark:to-gray-900/50">
+    <div className="relative flex h-[72vh] min-h-[480px] max-h-[780px] flex-col gap-3 overflow-hidden rounded-xl bg-gradient-to-b from-indigo-50/50 to-blue-50/50 dark:from-gray-800/50 dark:to-gray-900/50">
       <Badge
         variant="outline"
         className={`absolute right-4 top-4 py-1 px-3 font-medium ${
@@ -61,6 +60,13 @@ const ChatComponent = ({ reportData }: Props) => {
         <Textarea
           value={input}
           onChange={handleInputChange}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" && !event.shiftKey) {
+              event.preventDefault();
+              const form = event.currentTarget.form;
+              form?.requestSubmit();
+            }
+          }}
           placeholder="Type your mental health question here..."
           className="min-h-12 resize-none border-0 p-4 shadow-none focus-visible:ring-1 focus-visible:ring-indigo-300 dark:focus-visible:ring-indigo-700 dark:bg-gray-800 dark:text-gray-100"
         />

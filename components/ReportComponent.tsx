@@ -33,26 +33,29 @@ const ReportComponent: FC<Props> = ({ onReportConfirmation }: Props) => {
 
     setIsLoading(true);
     try {
-      const response = await fetch("/api/listgeminireport", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          base64: base64Data,
+const response = await fetch("/api/upload/report", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        fileBase64: base64Data,
+        language: "en",
         }),
       });
 
       if (response.ok) {
-        const reportText = await response.text();
+        const data = await response.json();
+        const reportText = data?.analysis || data?.report || data?.summary || "";
 
-        const formattedText = reportText
+        const formattedText = String(reportText)
           .replace(/\\n/g, "\n")
           .replace(/\*\*/g, "")
           .replace(/^##\s*/gm, "")
           .trim();
 
         setReportData(formattedText);
+        onReportConfirmation(formattedText);
 
         toast({
           variant: "default",

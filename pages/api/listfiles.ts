@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import path from "path";
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "GET") {
+  if (req.method !== "GET" && req.method !== "POST") {
     res.status(405).json({ message: "Method not allowed" });
     return;
   }
