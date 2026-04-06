@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSetAtom } from "jotai";
@@ -12,7 +12,7 @@ import { signup } from "@/services/authService";
 import { hydrateAuthUserAtom } from "@/store/authAtom";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
 
-export default function SignupPage() {
+function SignupContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const hydrateAuthUser = useSetAtom(hydrateAuthUserAtom);
@@ -230,5 +230,13 @@ export default function SignupPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white dark:bg-slate-950" />}>
+      <SignupContent />
+    </Suspense>
   );
 }

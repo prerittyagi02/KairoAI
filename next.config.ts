@@ -1,10 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  output: process.env.NEXT_OUTPUT_STANDALONE === "true" ? "standalone" : undefined,
   serverExternalPackages: [
     "onnxruntime-node",
-    "sharp", // Add sharp to the external packages list
+    "sharp",
   ],
   images: {
     remotePatterns: [

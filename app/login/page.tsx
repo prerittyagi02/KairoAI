@@ -4,7 +4,7 @@ import { useSetAtom } from "jotai";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +12,7 @@ import { toast } from "@/components/ui/use_toast";
 import { login } from "@/services/authService";
 import { hydrateAuthUserAtom } from "@/store/authAtom";
 
-export default function LoginPage() {
+function LoginContent() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const hydrateAuthUser = useSetAtom(hydrateAuthUserAtom);
@@ -159,5 +159,13 @@ export default function LoginPage() {
 				</div>
 			</div>
 		</div>
+	);
+}
+
+export default function LoginPage() {
+	return (
+		<Suspense fallback={<div className="min-h-screen bg-white dark:bg-slate-950" />}>
+			<LoginContent />
+		</Suspense>
 	);
 }
