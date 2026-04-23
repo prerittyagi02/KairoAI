@@ -60,6 +60,8 @@ type EcgPrediction = {
 	probabilities: Record<string, number>;
 };
 
+const ECG_CLASSES: EcgPrediction["label"][] = ["HB", "MI", "PMI", "Normal"];
+
 function guessFileExtension(mimeType: string) {
 	if (mimeType.includes("png")) return "png";
 	if (mimeType.includes("jpeg") || mimeType.includes("jpg")) return "jpg";
@@ -67,7 +69,7 @@ function guessFileExtension(mimeType: string) {
 	return "png";
 }
 
-async function runEcgModel(
+async function runEcgModelLocal(
 	base64: string,
 	mimeType: string,
 ): Promise<EcgPrediction> {
@@ -107,6 +109,82 @@ async function runEcgModel(
 	} finally {
 		await fs.unlink(tempImagePath).catch(() => undefined);
 	}
+}
+
+function ensureValidEcgPrediction(payload: unknown): EcgPrediction {
+	const parsed = payload as Partial<EcgPrediction> | null;
+	if (!parsed || typeof parsed !== "object") {
+		throw new Error("Invalid ECG service response.");
+	}
+
+	if (!parsed.label || !ECG_CLASSES.includes(parsed.label)) {
+		throw new Error("ECG service returned an unknown label.");
+	}
+
+	if (typeof parsed.confidence !== "number" || Number.isNaN(parsed.confidence)) {
+		throw new Error("ECG service returned invalid confidence.");
+	}
+
+	return {
+		label: parsed.label,
+		confidence: parsed.confidence,
+		probabilities:
+			parsed.probabilities && typeof parsed.probabilities === "object"
+				? parsed.probabilities
+				: {},
+	};
+}
+
+async function runEcgModelRemote(
+	serviceUrl: string,
+	base64: string,
+	mimeType: string,
+): Promise<EcgPrediction> {
+	const endpointBase = serviceUrl.replace(/\/+$/, "");
+	const maxAttempts = 3;
+	const timeoutMs = Number(process.env.ECG_REMOTE_TIMEOUT_MS ?? "25000");
+	let lastError: unknown;
+
+	for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+		const controller = new AbortController();
+		const timeout = setTimeout(() => controller.abort(), timeoutMs);
+		try {
+			const response = await fetch(`${endpointBase}/predict-base64`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					imageBase64: `data:${mimeType};base64,${base64}`,
+				}),
+				signal: controller.signal,
+			});
+
+			if (!response.ok) {
+				const errorBody = (await response.json().catch(() => null)) as
+					| { detail?: string; message?: string; error?: string }
+					| null;
+				throw new Error(
+					errorBody?.detail ||
+						errorBody?.message ||
+						errorBody?.error ||
+						`ECG service failed (${response.status})`,
+				);
+			}
+
+			const payload = (await response.json()) as unknown;
+			return ensureValidEcgPrediction(payload);
+		} catch (error) {
+			lastError = error;
+			if (attempt < maxAttempts) {
+				await new Promise((resolve) => setTimeout(resolve, 600 * attempt));
+			}
+		} finally {
+			clearTimeout(timeout);
+		}
+	}
+
+	const message =
+		lastError instanceof Error ? lastError.message : "Remote ECG inference failed.";
+	throw new Error(`Remote ECG inference failed after ${maxAttempts} attempts: ${message}`);
 }
 
 async function generateAnalysisWithRetry(
@@ -201,13 +279,34 @@ export default async function handler(
 
 	let ecgPrediction: EcgPrediction | null = null;
 	let ecgModelError: string | null = null;
+	const ecgServiceUrl = process.env.ECG_SERVICE_URL?.trim() || "";
+	const allowLocalFallback = process.env.ECG_ALLOW_LOCAL_FALLBACK === "true";
 
 	if (scanType === "ecg" || scanType === "auto") {
 		try {
-			ecgPrediction = await runEcgModel(parsed.base64, parsed.mimeType);
+			if (ecgServiceUrl) {
+				ecgPrediction = await runEcgModelRemote(
+					ecgServiceUrl,
+					parsed.base64,
+					parsed.mimeType,
+				);
+			} else {
+				ecgPrediction = await runEcgModelLocal(parsed.base64, parsed.mimeType);
+			}
 		} catch (error) {
-			ecgModelError =
-				error instanceof Error ? error.message : "ECG model inference failed.";
+			if (ecgServiceUrl && allowLocalFallback) {
+				try {
+					ecgPrediction = await runEcgModelLocal(parsed.base64, parsed.mimeType);
+				} catch (fallbackError) {
+					ecgModelError =
+						fallbackError instanceof Error
+							? fallbackError.message
+							: "ECG model inference failed.";
+				}
+			} else {
+				ecgModelError =
+					error instanceof Error ? error.message : "ECG model inference failed.";
+			}
 		}
 	}
 
