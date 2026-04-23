@@ -8,6 +8,7 @@ export type AnalyzeReportPayload = {
 export type AnalyzeXrayPayload = {
   imageBase64: string;
   language?: string;
+  scanType?: "xray" | "ecg" | "auto";
 };
 
 export type AnalyzeAudioPayload = {
@@ -29,14 +30,30 @@ export async function analyzeReport(payload: AnalyzeReportPayload) {
 }
 
 export async function analyzeXray(payload: AnalyzeXrayPayload) {
-  return apiFetch<{ analysis: string }>("/api/upload/xray", {
+  return apiFetch<{
+    analysis: string;
+    accuracy?: number | null;
+    ecgPrediction?: {
+      label: "HB" | "MI" | "PMI" | "Normal";
+      confidence: number;
+      probabilities: Record<string, number>;
+    } | null;
+    ecgModelError?: string | null;
+  }>("/api/upload/xray", {
     method: "POST",
     body: JSON.stringify(payload),
   });
 }
 
 export async function analyzeAudio(payload: AnalyzeAudioPayload) {
-  return apiFetch<{ analysis: string }>("/api/upload/audio", {
+  return apiFetch<{
+    analysis: string;
+    transcript: string;
+    confidence: number | null;
+    urgencyLevel: "low" | "moderate" | "high" | "emergency" | "unknown";
+    possibleSymptoms: string[];
+    nextSteps: string[];
+  }>("/api/upload/audio", {
     method: "POST",
     body: JSON.stringify(payload),
   });

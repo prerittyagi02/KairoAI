@@ -33,11 +33,11 @@ const testimonials = [
 export default function HomePage() {
 	const [showStickyCta, setShowStickyCta] = useState(false);
 	const [dismissStickyCta, setDismissStickyCta] = useState(false);
-	const { isAuthenticated } = useAuthUser();
+	const { isAuthenticated, isLoading } = useAuthUser();
 
 	useEffect(() => {
 		const onScroll = () => {
-			if (isAuthenticated) {
+			if (isLoading || isAuthenticated) {
 				return setShowStickyCta(false);
 			}
 			setShowStickyCta(window.scrollY > 420);
@@ -46,13 +46,13 @@ export default function HomePage() {
 		onScroll();
 		window.addEventListener("scroll", onScroll, { passive: true });
 		return () => window.removeEventListener("scroll", onScroll);
-	}, [isAuthenticated]);
+	}, [isAuthenticated, isLoading]);
 
 	return (
 		<div className="min-h-screen bg-gradient-to-b from-emerald-50/70 via-white to-sky-50/70 dark:bg-gradient-to-b dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
 			<Navbar />
 			<main>
-				<HeroSection />
+				<HeroSection isAuthenticated={isAuthenticated} isLoading={isLoading} />
 				<FeaturesSection />
 
 				<section className="py-16 sm:py-12">
@@ -208,18 +208,29 @@ export default function HomePage() {
 									</span>
 								</div>
 
-								<div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-									<Link href="/signup">
-										<button className="rounded-full bg-emerald-700 px-8 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800 dark:bg-emerald-600 dark:text-white dark:hover:bg-emerald-500">
-											Create free account
-										</button>
-									</Link>
-									<Link href="/login">
-										<button className="rounded-full border border-emerald-300 bg-white/90 px-8 py-3 text-sm font-semibold text-slate-900 hover:bg-emerald-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
-											Login
-										</button>
-									</Link>
-								</div>
+								{!isLoading && !isAuthenticated ? (
+									<div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+										<Link href="/signup">
+											<button className="rounded-full bg-emerald-700 px-8 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800 dark:bg-emerald-600 dark:text-white dark:hover:bg-emerald-500">
+												Create free account
+											</button>
+										</Link>
+										<Link href="/login">
+											<button className="rounded-full border border-emerald-300 bg-white/90 px-8 py-3 text-sm font-semibold text-slate-900 hover:bg-emerald-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+												Login
+											</button>
+										</Link>
+									</div>
+								) : null}
+								{!isLoading && isAuthenticated ? (
+									<div className="mt-8 flex justify-center">
+										<Link href="/dashboard">
+											<button className="rounded-full bg-emerald-700 px-8 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800 dark:bg-emerald-600 dark:text-white dark:hover:bg-emerald-500">
+												Go to Dashboard
+											</button>
+										</Link>
+									</div>
+								) : null}
 							</div>
 						</div>
 					</div>
@@ -228,7 +239,7 @@ export default function HomePage() {
 
 			<AppFooter />
 
-			{showStickyCta && !dismissStickyCta ? (
+			{!isLoading && !isAuthenticated && showStickyCta && !dismissStickyCta ? (
 				<div className="fixed bottom-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 rounded-2xl border border-emerald-300 bg-white/95 p-3 shadow-lg backdrop-blur dark:border-slate-700 dark:bg-slate-900/95">
 					<div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
 						<p className="text-sm font-medium text-slate-800 dark:text-slate-200">

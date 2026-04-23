@@ -24,6 +24,57 @@ function parseDataUrl(dataUrl: string) {
   };
 }
 
+async function generateReportWithRetry(
+  systemPrompt: string,
+  userPrompt: string,
+  base64: string,
+  mimeType: string
+) {
+  const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash"];
+  const maxAttempts = 3;
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    for (const modelName of modelsToTry) {
+      try {
+        const { text } = await generateText({
+          model: google(modelName),
+          system: systemPrompt,
+          messages: [
+            {
+              role: "user",
+              content: [
+                { type: "text", text: userPrompt },
+                {
+                  type: "file",
+                  data: base64,
+                  mimeType,
+                },
+              ],
+            },
+          ],
+          temperature: 0.2,
+          maxTokens: 2200,
+        });
+
+        return text;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    if (attempt < maxAttempts) {
+      await new Promise((resolve) => setTimeout(resolve, 900 * attempt));
+    }
+  }
+
+  const lastMessage =
+    lastError instanceof Error
+      ? lastError.message
+      : "Model temporarily unavailable.";
+  throw new Error(`Failed after ${maxAttempts} attempts. Last error: ${lastMessage}`);
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
     res.status(405).json({ message: "Method not allowed" });
@@ -94,33 +145,22 @@ Return a structured markdown response with:
 Complete all sections fully before ending your response.`;
 
   try {
-    const { text } = await generateText({
-      model: google("gemini-2.5-flash"),
-      system: systemPrompt,
-      messages: [
-        {
-          role: "user",
-          content: [
-            { type: "text", text: userPrompt },
-            {
-              type: "file",
-              data: parsed.base64,
-              mimeType: parsed.mimeType,
-            },
-          ],
-        },
-      ],
-      temperature: 0.2,
-      maxTokens: 2200,
-    });
+    const text = await generateReportWithRetry(
+      systemPrompt,
+      userPrompt,
+      parsed.base64,
+      parsed.mimeType
+    );
 
     res.status(200).json({
       success: true,
       analysis: text.trim(),
     });
   } catch (error) {
-    res.status(500).json({
-      message: error instanceof Error ? error.message : "Unable to analyze report right now.",
+    const message =
+      error instanceof Error ? error.message : "Unable to analyze report right now.";
+    res.status(message.includes("Failed after 3 attempts") ? 503 : 500).json({
+      message,
     });
   }
 }

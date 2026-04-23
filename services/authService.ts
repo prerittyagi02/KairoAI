@@ -40,6 +40,16 @@ export async function getMe() {
   });
 }
 
+export async function updateSettings(payload: {
+  displayName: string;
+  preferredLanguage: string;
+}) {
+  return apiFetch<{ user: AuthUser }>("/api/settings", {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
 export async function logout() {
   return apiFetch<{ success: true }>("/api/logout", {
     method: "POST",

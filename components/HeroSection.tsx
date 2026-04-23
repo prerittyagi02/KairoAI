@@ -12,7 +12,12 @@ const highlights = [
   "Get clear next-step suggestions",
 ];
 
-export default function HeroSection() {
+type HeroSectionProps = {
+  isAuthenticated: boolean;
+  isLoading: boolean;
+};
+
+export default function HeroSection({ isAuthenticated, isLoading }: HeroSectionProps) {
   return (
     <section className="border-b border-emerald-100 bg-gradient-to-b from-emerald-50/70 via-white to-sky-50/60 py-16 dark:border-slate-800 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 sm:py-20">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 lg:grid-cols-2 lg:items-center">
@@ -43,16 +48,27 @@ export default function HeroSection() {
             transition={{ duration: 0.45, delay: 0.1 }}
             className="mt-8 flex flex-col items-center gap-3 sm:flex-row lg:justify-start"
           >
-            <Link href="/signup">
-              <Button size="lg" className="rounded-full bg-emerald-700 px-8 text-white hover:bg-emerald-800 dark:bg-emerald-600 dark:text-white dark:hover:bg-emerald-500">
-                Get Started
-              </Button>
-            </Link>
-            <Link href="/login">
-              <Button variant="outline" size="lg" className="rounded-full px-8">
-                Login
-              </Button>
-            </Link>
+            {!isLoading && !isAuthenticated ? (
+              <>
+                <Link href="/signup">
+                  <Button size="lg" className="rounded-full bg-emerald-700 px-8 text-white hover:bg-emerald-800 dark:bg-emerald-600 dark:text-white dark:hover:bg-emerald-500">
+                    Get Started
+                  </Button>
+                </Link>
+                <Link href="/login">
+                  <Button variant="outline" size="lg" className="rounded-full px-8">
+                    Login
+                  </Button>
+                </Link>
+              </>
+            ) : null}
+            {!isLoading && isAuthenticated ? (
+              <Link href="/dashboard">
+                <Button size="lg" className="rounded-full bg-emerald-700 px-8 text-white hover:bg-emerald-800 dark:bg-emerald-600 dark:text-white dark:hover:bg-emerald-500">
+                  Open Dashboard
+                </Button>
+              </Link>
+            ) : null}
           </motion.div>
 
           <ul className="mt-8 space-y-3 text-left">
